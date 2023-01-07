@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Table</title>
+    <link rel="stylesheet" href="table.css">
+</head>
+
+<body style="text-align:center;" id="body">
+    <form action="table.html" method="get">
+        <input type="text" name="search" placeholder="Function name...">
+        &nbsp;
+        <input type="submit" value="Search">
+    </form>
+</body>
+
+<script>
+    /* Obtain an element color based on (true, false, ...) value
+    */
+    function getColor(value) {
+        switch (value) {
+            case "true":
+            case true:
+                return "green";
+            case "false":
+            case false:
+                return "red";
+            default:
+                return "orange";
+        }
+    }
+
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+        get: (searchParams, prop) => searchParams.get(prop),
+    });
+    let header = params.header;
+    if (header === "" || header === "null") header = null;
+
+    // JSON path to use
+    let path;
+    if (header == null) {
+        path = "../output.json";
+    }
+    else {
+        path = "../output-f/" + header;
+        path = path.substring(0, path.length - 1);
+        path = path + "json";
+    }
+
+    let func = params.function;
+    let search = params.search;
+    if (search === "") search = null;
+
+    // Set title
+    document.title = (func == null ? (header == null ? "All indexed functions" : header) : func);
+    if (search != null) document.title += " - Search for '" + search + "'"
+
+    // Add body header
+    let bodyHeader = document.createElement("h1");
+    bodyHeader.setAttribute("id", "bodyHeader");
+    bodyHeader.innerHTML = document.title;
+    document.getElementById("body").appendChild(bodyHeader);
+
+    // Open and read json file
+    let request = new XMLHttpRequest();
+    request.open("GET", path, false);
+    request.send(null);
+    if (request.status != 200) {
+        // Set body to error message
+        document.getElementById("body").innerHTML = "Error " + request.status + " occurred when trying to access \"" + path + "\"";
+        throw new Error("Error " + request.status + " occurred when trying to access \"" + path + "\"");
+    }
+
+    let json = JSON.parse(request.responseText);
+
+    // Create table
+    let table = document.createElement("table");
+    table.setAttribute("id", "table");
+    document.getElementById("body").appendChild(table);
+    // Set centered
+    document.getElementById("table").style.marginLeft = "auto";
+    document.getElementById("table").style.marginRight = "auto";
+    // Set row border collapse
+    document.getElementById("table").style.borderCollapse = "collapse";
+    // Set row width
+    document.getElementById("table").style.width = "900px";
+
+    // Create header row
+    let headerRow = document.createElement("tr");
+    headerRow.setAttribute("id", "headerRow");
+    document.getElementById("table").appendChild(headerRow);
+
+    // Create header cells
+    let headerCell = document.createElement("th");
+    headerCell.setAttribute("id", "headerCell");
+    headerCell.innerHTML = "Function";
+    document.getElementById("headerRow").appendChild(headerCell);
+    headerCell = document.createElement("th");
+    headerCell.setAttribute("id", "headerCell");
+    headerCell.innerHTML = "C Standard";
+    document.getElementById("headerRow").appendChild(headerCell);
+    headerCell = document.createElement("th");
+    headerCell.setAttribute("id", "headerCell");
+    headerCell.innerHTML = "SuS";
+    document.getElementById("headerRow").appendChild(headerCell);
+    headerCell = document.createElement("th");
+    headerCell.setAttribute("id", "headerCell");
+    headerCell.innerHTML = "Library";
+    document.getElementById("headerRow").appendChild(headerCell);
+
+    // Create rows
+    if (func != null) {
+        for (let i = 0; i < json.length; i++) {
+            if (json[i].name == func) {
+                json = [json[i]];
+                break;
+            }
+        }
+        json.length = 1;
+    }
+
+    for (let i = 0; i < json.length; i++) {
+        // Ignore empty elements
+        if (json[i].name == null)
+            continue;
+
+        // Ignore elements that does not comply to search string
+        if (search != null) {
+            if (!json[i].name.includes(search))
+                continue;
+        }
+
+        let row = document.createElement("tr");
+        row.setAttribute("id", "row");
+        document.getElementById("table").appendChild(row);
+
+        // Function name cell
+        let cell = document.createElement("td");
+        cell.setAttribute("id", "cell");
+        cell.innerHTML = json[i].name;
+        document.getElementById("row").appendChild(cell);
+
+        // C Standard cell
+        let c89 = json[i].c89;
+        let c99 = json[i].c99;
+        let c11 = json[i].c11;
+        let c2x = json[i].c2x;
+
+        cell = document.createElement("td");
+        cell.setAttribute("id", "cell");
+        cell.innerHTML = "<p style=\"color:" + getColor(c89) + ";\">C89</p>" +
+            "<p style=\"color:" + getColor(c99) + ";\">C99</p>" +
+            "<p style=\"color:" + getColor(c11) + ";\">C11</p>" +
+            "<p style=\"color:" + getColor(c2x) + ";\">C2x</p>";
+        document.getElementById("row").appendChild(cell);
+
+        // SuS cell
+        let susv2 = json[i].susv2;
+        let susv3 = json[i].susv3;
+        let susv4 = json[i].susv4;
+
+        cell = document.createElement("td");
+        cell.setAttribute("id", "cell");
+        cell.innerHTML = "<p style=\"color:" + getColor(susv2) + ";\">SuSv2</p>" +
+            "<p style=\"color:" + getColor(susv3) + "\">SuSv3</p>" +
+            "<p style=\"color:" + getColor(susv4) + "\">SuSv4</p>";
+        document.getElementById("row").appendChild(cell);
+
+        // Library cell
+        let glibc = json[i].glibc;
+        let musl = json[i].musl;
+        let uclibc = json[i]["uClibc-ng"];
+        let dietlibc = json[i].dietlibc;
+        let apple = json[i]["apple-libc"];
+        let msvcrt = json[i]["msvcrt"];
+        let ucrt = json[i]["ucrt"];
+        let freebsd = json[i]["freebsd-libc"];
+        let openbsd = json[i]["openbsd-libc"];
+        let netbsd = json[i]["netbsd-libc"];
+        let dragonflybsd = json[i]["dragonflybsd-libc"];
+        let mingw = json[i]["mingw"];
+        let cygwin = json[i]["cygwin"];
+
+        cell = document.createElement("td");
+        cell.setAttribute("id", "cell");
+        cell.innerHTML = "<p style=\"color:" + getColor(glibc) + "\">glibc</p>" +
+            "<p style=\"color:" + getColor(musl) + "\">musl</p>" +
+            "<p style=\"color:" + getColor(uclibc) + "\">uClibc-ng</p>" +
+            "<p style=\"color:" + getColor(dietlibc) + "\">dietlibc</p>" +
+            "<p style=\"color:" + getColor(apple) + "\">Apple libc</p>" +
+            "<p style=\"color:" + getColor(msvcrt) + "\">Windows MSVCRT</p>" +
+            "<p style=\"color:" + getColor(ucrt) + "\">Windows UCRT</p>" +
+            "<p style=\"color:" + getColor(freebsd) + "\">FreeBSD libc</p>" +
+            "<p style=\"color:" + getColor(netbsd) + "\">NetBSD libc</p>" +
+            "<p style=\"color:" + getColor(openbsd) + "\">OpenBSD libc</p>" +
+            "<p style=\"color:" + getColor(dragonflybsd) + "\">DragonFly BSD libc</p>" +
+            "<p style=\"color:" + getColor(mingw) + "\">MinGW-w64</p>" +
+            "<p style=\"color:" + getColor(cygwin) + "\">Cygwin</p>";
+        document.getElementById("row").appendChild(cell);
+
+        // Set row id
+        row.setAttribute("id", "row" + i);
+        // Set row class
+        row.setAttribute("class", "row");
+        // Set row onclick
+        if (func == null)
+            row.setAttribute("onclick", "window.location.href = 'table.html?header=" + header + "&function=" + json[i].name + "';");
+        // Set row hover
+        row.setAttribute("onmouseover", "document.getElementById('row" + i + "').style.backgroundColor = '#e6e6e6';");
+        // Set row hover out
+        row.setAttribute("onmouseout", "document.getElementById('row" + i + "').style.backgroundColor = 'white';");
+    }
+</script>
+
+</html>

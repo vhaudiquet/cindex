@@ -1,0 +1,10 @@
+# Ignore C stdlibs
+libs/
+
+# Ignore output files
+output*/
+output.json
+a.out
+
+# Ignore SuS specs files
+sus*/
