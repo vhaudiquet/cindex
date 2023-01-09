@@ -14,7 +14,7 @@ This repository contains the tools used to generate a json database of functions
 
 ## Using the database
 
-The database can be accessed via the web hosted implementation [here]().
+The database can be accessed via the web hosted implementation [here](https://valou3433.fr/cindex/).
 It was generated on my personal computer, using virtual machines.
 
 ## Generating a database
@@ -47,7 +47,7 @@ chmod +x main.sh index.sh getlib.sh merge.sh # Add execution rights if needed
 
 ## TODO
 
-- Generate "stdh.sh" automatically, including : Cstd, SuS, GNU exts, BSD exts
+- Generate "stdh.sh" automatically, including : C std, SuS, GNU exts, BSD exts
 - MacOS indexer
 - Windows indexer (WIP, need stdh generator to generate powershell arrays....)
 

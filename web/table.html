@@ -50,7 +50,7 @@
 
     let func = params.function;
     let search = params.search;
-    if (search === "") search = null;
+    if (search === "" || search === "null") search = null;
 
     // Set title
     document.title = (func == null ? (header == null ? "All indexed functions" : header) : func);
